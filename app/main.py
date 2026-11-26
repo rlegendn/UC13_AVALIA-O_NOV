@@ -26,7 +26,7 @@ def consultar(evento_id: int):
         raise HTTPException(status_code=404, detail="Evento não encontrado")
     return evento
 
-@app.post("/api/eventos", status_code=status.HTTP_200_OK)
+@app.post("/api/eventos", status_code=status.HTTP_201_CREATED)
 def cadastrar(dados: EventoEntrada):
     evento_id = repositorio.criar_evento(dados.nome, dados.capacidade)
     return {"id": evento_id, "nome": dados.nome, "capacidade": dados.capacidade,

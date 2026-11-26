@@ -33,4 +33,11 @@ um dos 3 items do banco DB não é mostrado ao executar a busca do GET /api/even
 
  ## terceiro problema
 
- 
+ ### cenario 
+
+ o codigo do bloco da função cadastrar eventos, contido na linha
+29 do codigo ate a linha 33 apresenta resposta diferente ao que estava acontecendo na API, tendo em base que essa função esta criando um novo dado, a resposta http precisa ser "201, CREATED", equanto ela retornava "200, OK".
+
+### solução
+
+a unica mudança foi trocar a resposta (status_code=status.HTTP_201_OK) por (status_code=status.HTTP_201_CREATED) que o sistema passou a responder o erro corretamente.
