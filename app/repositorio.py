@@ -52,15 +52,27 @@ def criar_evento(nome: str, capacidade: int):
 def registrar_ingressos(evento_id: int, quantidade: int):
     conexao = conectar()
     try:
-        conexao.execute(
-            "UPDATE eventos SET ingressos_vendidos = ingressos_vendidos + ? WHERE id = ?",
-            (quantidade, evento_id),
+        cursor = conexao.execute(
+            """
+            UPDATE eventos
+            SET ingressos_vendidos = ingressos_vendidos + ?
+            WHERE id = ?
+            AND ingressos_vendidos + ? <= capacidade
+            """,
+            (quantidade, evento_id, quantidade),
         )
+
+        if cursor.rowcount == 0:
+            return None
+
         conexao.commit()
+
         linha = conexao.execute(
             "SELECT id, nome, capacidade, ingressos_vendidos FROM eventos WHERE id = ?",
             (evento_id,),
         ).fetchone()
+
         return dict(linha) if linha is not None else None
+
     finally:
         conexao.close()

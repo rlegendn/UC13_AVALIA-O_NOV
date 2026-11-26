@@ -7,3 +7,5 @@ class EventoEntrada(BaseModel):
 
 class PedidoIngressos(BaseModel):
     quantidade: int = Field(gt=0)
+
+

@@ -35,7 +35,13 @@ def cadastrar(dados: EventoEntrada):
 @app.post("/api/eventos/{evento_id}/ingressos", status_code=status.HTTP_201_CREATED)
 def comprar_ingressos(evento_id: int, pedido: PedidoIngressos):
     evento = repositorio.buscar_evento(evento_id)
+
     if evento is None:
         raise HTTPException(status_code=404, detail="Evento não encontrado")
+
     atualizado = repositorio.registrar_ingressos(evento_id, pedido.quantidade)
+
+    if atualizado is None:
+        raise HTTPException(status_code=409, detail="Vagas insuficientes")
+
     return atualizado
