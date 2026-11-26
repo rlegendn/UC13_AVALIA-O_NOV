@@ -39,3 +39,21 @@ def comprar_ingressos(evento_id: int, pedido: PedidoIngressos):
         raise HTTPException(status_code=404, detail="Evento não encontrado")
     atualizado = repositorio.registrar_ingressos(evento_id, pedido.quantidade)
     return atualizado
+
+@app.get("/api/eventos/{evento_id}/disponibilidade")
+def disponibilidade(evento_id: int):
+    resultado = repositorio.consultar_disponibilidade(evento_id)
+    if resultado is None:
+        raise HTTPException(status_code=404, detail="Evento não encontrado")
+    return resultado
+
+@app.get("/api/relatorios/mais-vendidos")
+def relatorio_mais_vendidos():
+    return repositorio.listar_mais_vendidos()
+
+@app.post("/api/eventos/{evento_id}/cancelamentos")
+def cancelar_ingressos(evento_id: int, pedido: PedidoIngressos):
+    resultado = repositorio.cancelar_ingressos(evento_id, pedido.quantidade)
+    if resultado is None:
+        raise HTTPException(status_code=404, detail="Evento não encontrado")
+    return resultado
