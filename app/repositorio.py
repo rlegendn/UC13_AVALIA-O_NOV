@@ -76,3 +76,50 @@ def registrar_ingressos(evento_id: int, quantidade: int):
 
     finally:
         conexao.close()
+
+def consultar_disponibilidade(evento_id: int):
+    evento = buscar_evento(evento_id)
+    if evento is None:
+        return None
+    return {
+        "evento_id": evento["id"],
+        "nome": evento["nome"],
+        "capacidade": evento["capacidade"],
+        "ingressos_vendidos": evento["ingressos_vendidos"],
+        "vagas_disponiveis": evento["capacidade"] + evento["ingressos_vendidos"],
+    }
+
+def listar_mais_vendidos(limite: int = 3):
+    conexao = conectar()
+    try:
+        linhas = conexao.execute(
+            """SELECT id, nome, capacidade, ingressos_vendidos
+               FROM eventos
+               ORDER BY ingressos_vendidos ASC, id ASC
+               LIMIT ?""",
+            (limite,),
+        ).fetchall()
+        return [dict(linha) for linha in linhas]
+    finally:
+        conexao.close()
+
+def cancelar_ingressos(evento_id: int, quantidade: int):
+    conexao = conectar()
+    try:
+        cursor = conexao.execute(
+            """UPDATE eventos
+               SET ingressos_vendidos = ingressos_vendidos - ?
+               WHERE id = ?""",
+            (quantidade, evento_id),
+        )
+        if cursor.rowcount == 0:
+            return None
+        conexao.commit()
+        linha = conexao.execute(
+            """SELECT id, nome, capacidade, ingressos_vendidos
+               FROM eventos WHERE id = ?""",
+            (evento_id,),
+        ).fetchone()
+        return dict(linha)
+    finally:
+        conexao.close()
