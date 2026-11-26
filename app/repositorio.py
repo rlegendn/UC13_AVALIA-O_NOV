@@ -5,7 +5,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 CAMINHO_BANCO = Path(os.environ.get(
-    "UC13_DB_PATH", str(RAIZ / "dados" / "eventos_arquivo.db")
+    "UC13_DB_PATH", str(RAIZ / "dados" / "eventos.db")
 ))
 
 def conectar():
@@ -19,7 +19,7 @@ def listar_eventos():
         linhas = conexao.execute(
             """SELECT id, nome, capacidade, ingressos_vendidos
                FROM eventos
-               WHERE capacidade >= 50
+               
                ORDER BY id"""
         ).fetchall()
         return [dict(linha) for linha in linhas]

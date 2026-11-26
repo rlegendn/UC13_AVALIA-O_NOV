@@ -4,10 +4,16 @@ from . import repositorio
 from .schemas import EventoEntrada, PedidoIngressos
 
 app = FastAPI(title="API de Eventos — UC-13", version="0.2")
+# @app.get("/")
+# def pagina_inicial():
+#     return {
+#         "mensagem": "API de Eventos funcionando!",
+#         "status": "Online",
+#     }
 
 @app.get("/api/saude")
 def saude():
-    return {"status": "ok", "servico": "eventos"}
+     return {"status": "ok", "servico": "eventos"}
 
 @app.get("/api/eventos")
 def listar():
