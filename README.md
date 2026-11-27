@@ -15,50 +15,20 @@ A completar pelo responsável pela manutenção.
 ## Verificação e manutenção
 A completar com os resultados dos testes e as alterações realizadas.
 
-# Correção da API
+# API de Eventos
 
-## Primeiro problema
+## Como utilizar a API
 
-A API apresentava um erro de conexão com o banco, tendo em vista que o seu nome estava conflitante, o banco existente se chamava  eventos.db, enquanto o chamado na comunicação se chamava  eventos_novos.db, essa diferença de nomes fazia com que o get tentasse buscar informações em um banco não existente, devido a isso a API sempre retornava erro de servidor, apos corrigir na linha 8 do codigo o problema alteramos apenas o nome do arquivo do banco  para o seu  nome correto, apos isso o banco passou a devolver  a resposta corretamente, o get puxava shows existentes no banco.
+Para utilizar a API, primeiro é necessario iniciar o servidor pelo terminal, utilizando o comando de execução do FastAPI(py -m uvicorn "app.main:app" --reload). Após o servidor estar ativo, a API pode ser acessada pela rota http://127.0.0.1:8000, que é a porta local utilizada para a comunicação com o sistema.
 
-## Segundo problema
+Para facilitar a utilização e os testes, o FastAPI disponibiliza uma documentação interativa através da rota http://127.0.0.1:8000/docs. Nela é possível visualizar todas as funções disponíveis na API, realizar requisições e observar as respostas retornadas pelo sistema.
 
-### Cenario
+Na função GET `/api/eventos`, é possível consultar todos os eventos cadastrados no banco de dados, enquanto a função GET `/api/eventos/{evento_id}` permite buscar um evento específico utilizando seu ID. Caso seja necessário cadastrar um novo evento, a função POST `/api/eventos` permite inserir informações como nome e capacidade, gerando um novo registro no banco.
 
-Um dos 3 items do banco DB não é mostrado ao executar a busca do GET /api/eventos/{evento_id},o codigo deveria retornar 200 se id fosse existente ou 404 caso o ida não existisse entretanto alguns ids mesmo existindo não aparencem, muito provavel que exista uma restrição fechando o acesso(causa possivel e não obrigatoria).
+Para realizar a compra de ingressos, é utilizada a função POST `/api/eventos/{evento_id}/ingressos`, onde é necessário informar a quantidade de ingressos desejada. O sistema verifica se a quantidade solicitada está dentro da capacidade disponível do evento, impedindo que sejam realizadas vendas acima do limite permitido.
 
-### Solução
+A função GET `/api/eventos/{evento_id}/disponibilidade` permite consultar a quantidade de vagas restantes para determinado evento, considerando a capacidade total e os ingressos já vendidos. Já a função GET `/api/relatorios/mais-vendidos` apresenta os eventos com maior quantidade de ingressos vendidos, permitindo visualizar quais eventos possuem maior procura.
 
- Para que todos os ids sejam localizados, apaguei da função  listar eventos  a linha onde estava escrito WHERE capacidade>=50, essa restrição inpedia que todas as capcidades fossem mostradas.
+Também é possível realizar cancelamentos através da função POST `/api/eventos/{evento_id}/cancelamentos`, informando a quantidade de ingressos que deseja cancelar. A função PUT `/api/eventos/{evento_id}` permite alterar informações de um evento existente, como nome e capacidade, respeitando as validações aplicadas pelo sistema.
 
- ## Terceiro Problema
-
- ### Cenario 
-
-o codigo do bloco da função cadastrar eventos, contido na linha
-29 do codigo ate a linha 33 apresenta resposta diferente ao que estava acontecendo na API, tendo em base que essa função esta criando um novo dado, a resposta http precisa ser "201, CREATED", equanto ela retornava "200, OK".
-
-### Solução
-
-A unica mudança foi trocar a resposta (status_code=status.HTTP_201_OK) por (status_code=status.HTTP_201_CREATED) que o sistema passou a responder o erro corretamente.
-
-## Quarto Problema
-
-### Cenario
-
-Nas linhas 35 q 42 do arquivo main estava aplicado o bloco da função de comprar ingressos, o problema evidenciado é que a a API não retorna a resposta correta quando o usuario tentava comprar uma quantidade invalida de ingressos, ambas as outras respostas eram devidamente retornadas como(200,404 e 422) porem 409 não.
-
-### Primeira Tentativa
-
-Ao executar a primeira tentativa de correção, utilizei um metodo por logica considerei que PedidoIngressos guardava a quantidade de ingressos a serem comprados e atulizados supostamente guardaria a quantidade de ingressos existente no banco, mas acredito que ouve um equivoco considerando que o erro retornado na API é o erro 500, que é erro interno do servidor.
-
-##### Codigo do Teste
-
-if PedidoIngressos > atualizado:
-        raise HTTPException(status_code=409, detail="Evento não encontrado")
-
-### Segunda Tentativa
-
-Analisando o banco de dados, era necessario criar uma validação dentro da função registrar_ingressos(), foi percebido que o banco não fazia a validação necessaria para voltar erro 409, então foi mudando a arquitetura do codigo, neste momento o banco faz uma comparaçãoentre capacidade e ingressos_comprados, ao ingressos serem maiores que capacidade, da erro 409 por conta que não podem ser comprados mais ingressos do que existem no banco.
-
-Na função comprar_ngresso nas linha 35 do codigo "main.py", colocamos  condicional para avaliar se a varaiavel atualisado é valida ou não , se a quantidade exceder o valor  ele apresenta erro 409 e "Vagas Insuficientes"
+Por fim, a função GET `/api/relatorios/ocupacao` apresenta informações gerais sobre os eventos cadastrados, incluindo a capacidade total, quantidade de ingressos vendidos e vagas disponíveis. A função DELETE `/api/eventos/{evento_id}` permite excluir um evento, porém essa exclusão só é permitida quando não existem ingressos vendidos para ele.
